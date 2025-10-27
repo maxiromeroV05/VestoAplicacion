@@ -3,6 +3,9 @@ package com.example.vest0.viewmodel
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -10,6 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.vest0.model.Usuario
@@ -24,6 +29,7 @@ fun RegistroScreen(onRegistroExitoso: (Usuario) -> Unit) {
     var contraseña by remember { mutableStateOf("") }
     var nombre by remember { mutableStateOf("") }
     var apellido by remember { mutableStateOf("") }
+    var mostrarContraseña by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -42,7 +48,15 @@ fun RegistroScreen(onRegistroExitoso: (Usuario) -> Unit) {
         Spacer(Modifier.height(32.dp))
 
         RegistroCampo(label = "EMAIL", value = email, onValueChange = { email = it })
-        RegistroCampo(label = "CONTRASEÑA", value = contraseña, onValueChange = { contraseña = it })
+
+        RegistroCampoPassword(
+            label = "CONTRASEÑA",
+            value = contraseña,
+            onValueChange = { contraseña = it },
+            mostrar = mostrarContraseña,
+            onToggleMostrar = { mostrarContraseña = !mostrarContraseña }
+        )
+
         RegistroCampo(label = "NOMBRE", value = nombre, onValueChange = { nombre = it })
         RegistroCampo(label = "APELLIDOS", value = apellido, onValueChange = { apellido = it })
 
@@ -82,6 +96,36 @@ fun RegistroCampo(label: String, value: String, onValueChange: (String) -> Unit)
             onValueChange = onValueChange,
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
+        )
+        Spacer(Modifier.height(16.dp))
+    }
+}
+
+@Composable
+fun RegistroCampoPassword(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    mostrar: Boolean,
+    onToggleMostrar: () -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(label, fontSize = 12.sp, fontWeight = FontWeight.Light, color = Color.Gray)
+        Spacer(Modifier.height(4.dp))
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            visualTransformation = if (mostrar) VisualTransformation.None else PasswordVisualTransformation(),
+            trailingIcon = {
+                IconButton(onClick = onToggleMostrar) {
+                    Icon(
+                        imageVector = if (mostrar) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                        contentDescription = if (mostrar) "Ocultar contraseña" else "Mostrar contraseña"
+                    )
+                }
+            }
         )
         Spacer(Modifier.height(16.dp))
     }
