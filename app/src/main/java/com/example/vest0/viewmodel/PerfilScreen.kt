@@ -15,6 +15,9 @@ import androidx.compose.ui.unit.sp
 import com.example.vest0.datastore.UserPreferences
 import com.example.vest0.model.Usuario
 import com.example.vest0.repository.UsuarioRepositorySQLite
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.EmailAuthProvider
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 
 @Composable
@@ -66,14 +69,48 @@ fun PerfilScreen(
 
                 Spacer(Modifier.height(24.dp))
 
+                // 🔴 Botón de eliminar cuenta con lógica actualizada
                 Button(
                     onClick = {
-                        val eliminado = repo.eliminar(usuario.email)
-                        if (eliminado) {
-                            Toast.makeText(context, "Usuario eliminado", Toast.LENGTH_SHORT).show()
-                            scope.launch {
-                                prefs.clearEmail()
-                                onEliminarUsuario()
+                        val auth = FirebaseAuth.getInstance()
+                        val currentUser = auth.currentUser
+
+                        if (currentUser != null) {
+                            // Re-autenticación con email y contraseña del modelo
+                            val credential = EmailAuthProvider.getCredential(
+                                currentUser.email!!,
+                                usuario.contraseña // contraseña guardada en tu modelo
+                            )
+
+                            currentUser.reauthenticate(credential).addOnSuccessListener {
+                                currentUser.delete()
+                                    .addOnSuccessListener {
+                                        // 🔐 Eliminado de FirebaseAuth
+                                        FirebaseFirestore.getInstance()
+                                            .collection("usuarios")
+                                            .document(currentUser.uid)
+                                            .delete()
+                                            .addOnSuccessListener {
+                                                // ☁️ Eliminado de Firestore
+                                                val eliminado = repo.eliminar(usuario.email)
+                                                if (eliminado) {
+                                                    scope.launch {
+                                                        prefs.clearEmail()
+                                                        onEliminarUsuario()
+                                                    }
+                                                    Toast.makeText(context, "Usuario eliminado correctamente", Toast.LENGTH_SHORT).show()
+                                                    auth.signOut()
+                                                }
+                                            }
+                                            .addOnFailureListener {
+                                                Toast.makeText(context, "Error al eliminar en Firestore", Toast.LENGTH_SHORT).show()
+                                            }
+                                    }
+                                    .addOnFailureListener {
+                                        Toast.makeText(context, "Error al eliminar en FirebaseAuth", Toast.LENGTH_SHORT).show()
+                                    }
+                            }.addOnFailureListener {
+                                Toast.makeText(context, "Re-autenticación requerida", Toast.LENGTH_SHORT).show()
                             }
                         }
                     },
@@ -91,6 +128,7 @@ fun PerfilScreen(
                             prefs.clearEmail()
                             onCerrarSesion()
                         }
+                        FirebaseAuth.getInstance().signOut()
                         Toast.makeText(context, "Sesión cerrada", Toast.LENGTH_SHORT).show()
                     },
                     modifier = Modifier.fillMaxWidth(),

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "836868577328",
+    "project_id": "vestodata",
+    "storage_bucket": "vestodata.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:836868577328:android:651a9c6d30378b5d8835f5",
+        "android_client_info": {
+          "package_name": "com.example.vest0"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDBZ8M0JnMBdg_jRKnSHpgu39fuqsf-nks"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

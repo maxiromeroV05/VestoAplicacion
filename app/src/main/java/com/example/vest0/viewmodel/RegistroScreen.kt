@@ -19,6 +19,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.vest0.model.Usuario
 import com.example.vest0.repository.UsuarioRepositorySQLite
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
 fun RegistroScreen(onRegistroExitoso: (Usuario) -> Unit) {
@@ -65,13 +67,40 @@ fun RegistroScreen(onRegistroExitoso: (Usuario) -> Unit) {
             onClick = {
                 if (email.isNotBlank() && contraseña.isNotBlank() && nombre.isNotBlank() && apellido.isNotBlank()) {
                     val nuevoUsuario = Usuario(email, contraseña, nombre, apellido, perfilUser = "usuario")
-                    val exito = repo.insertar(nuevoUsuario)
-                    if (exito) {
-                        Toast.makeText(context, "Usuario registrado correctamente", Toast.LENGTH_SHORT).show()
-                        onRegistroExitoso(nuevoUsuario)
-                    } else {
-                        Toast.makeText(context, "Error al registrar usuario", Toast.LENGTH_SHORT).show()
-                    }
+
+                    FirebaseAuth.getInstance()
+                        .createUserWithEmailAndPassword(email, contraseña)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return@addOnCompleteListener
+
+                                val perfil = mapOf(
+                                    "email" to email,
+                                    "nombre" to nombre,
+                                    "apellido" to apellido,
+                                    "perfilUser" to "usuario"
+                                )
+
+                                FirebaseFirestore.getInstance()
+                                    .collection("usuarios")
+                                    .document(uid)
+                                    .set(perfil)
+                                    .addOnSuccessListener {
+                                        val exito = repo.insertar(nuevoUsuario)
+                                        if (exito) {
+                                            Toast.makeText(context, "Usuario registrado correctamente", Toast.LENGTH_SHORT).show()
+                                            onRegistroExitoso(nuevoUsuario)
+                                        } else {
+                                            Toast.makeText(context, "Error al guardar localmente", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                    .addOnFailureListener {
+                                        Toast.makeText(context, "Error al guardar en Firestore", Toast.LENGTH_SHORT).show()
+                                    }
+                            } else {
+                                Toast.makeText(context, "Error al registrar en Firebase", Toast.LENGTH_SHORT).show()
+                            }
+                        }
                 } else {
                     Toast.makeText(context, "Completa todos los campos", Toast.LENGTH_SHORT).show()
                 }
