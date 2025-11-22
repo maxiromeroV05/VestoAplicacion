@@ -15,8 +15,6 @@ import com.example.vest0.viewmodel.PerfilScreen
 import com.example.vest0.viewmodel.ProductoDetalleScreen
 import com.example.vest0.viewmodel.RegistroScreen
 import com.example.vest0.viewmodel.UbicacionScreen
-import kotlin.collections.get
-import kotlin.collections.set
 
 @Composable
 fun AppNavHost(
@@ -28,10 +26,16 @@ fun AppNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = "menu",
+        startDestination = "welcome", // Iniciar en la nueva pantalla de bienvenida
         modifier = modifier
     ) {
-        composable("menu") { CentralContent() }
+        composable("welcome") {
+            WelcomeScreen(onNavigateToCatalog = {
+                navController.navigate("ropa") {
+                    popUpTo("welcome") { inclusive = true } // Evita volver a la pantalla de bienvenida
+                }
+            })
+        }
 
         composable("ropa") {
             CatalogoScreen { producto ->
@@ -62,12 +66,12 @@ fun AppNavHost(
                 onCerrarSesion = {
                     usuarioLogueado.value = false
                     usuarioRegistrado.value = null
-                    navController.navigate("menu") { popUpTo("menu") { inclusive = true } }
+                    navController.navigate("welcome") { popUpTo("welcome") { inclusive = true } }
                 },
                 onEliminarUsuario = {
                     usuarioLogueado.value = false
                     usuarioRegistrado.value = null
-                    navController.navigate("menu") { popUpTo("menu") { inclusive = true } }
+                    navController.navigate("welcome") { popUpTo("welcome") { inclusive = true } }
                 }
             )
         }
@@ -78,7 +82,7 @@ fun AppNavHost(
                     usuarioRegistrado.value = usuario
                     usuarioLogueado.value = true
                     navController.navigate("perfil") {
-                        popUpTo("menu") { inclusive = false }
+                        popUpTo("welcome") { inclusive = false }
                     }
                 }
             )
@@ -91,7 +95,7 @@ fun AppNavHost(
                     usuarioRegistrado.value = usuario
                     usuarioLogueado.value = true
                     navController.navigate("perfil") {
-                        popUpTo("menu") { inclusive = false }
+                        popUpTo("welcome") { inclusive = false }
                     }
                 },
                 onIrRegistro = { navController.navigate("registro") }

@@ -64,6 +64,7 @@ dependencies {
     implementation(libs.androidx.foundation)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.material.icons.extended)
+    implementation("androidx.core:core-splashscreen:1.0.1")
 
     // ✅ Persistencia local
     implementation(libs.androidx.datastore.preferences)

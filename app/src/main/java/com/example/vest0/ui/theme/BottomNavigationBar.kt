@@ -22,9 +22,8 @@ fun BottomNavigationBar(onNavigate: (String) -> Unit) {
         horizontalArrangement = Arrangement.SpaceAround,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        BottomBarButton("Ropa", R.drawable.ic_ropa_playstore) { onNavigate("ropa") }
+        BottomBarButton("Inicio", R.drawable.ic_home_playstore) { onNavigate("ropa") } // Navega al catálogo
         BottomBarButton("Ubicación", R.drawable.ic_location_playstore) { onNavigate("ubicacion") }
         BottomBarButton("Perfil", R.drawable.ic_profile_playstore) { onNavigate("perfil") }
-        BottomBarButton("Inicio", R.drawable.ic_home_playstore) { onNavigate("menu") }
     }
 }
